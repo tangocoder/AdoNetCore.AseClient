@@ -141,16 +141,21 @@ namespace AdoNetCore.AseClient
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
-
             if (_isDisposed)
             {
                 return;
             }
 
-            Rollback();
+            try
+            {
+                Rollback();
+            }
+            finally
+            {
+                _isDisposed = true;
+            }
 
-            _isDisposed = true;
+            base.Dispose(disposing);
         }
 
         internal bool IsDisposed => _isDisposed;
@@ -165,7 +170,7 @@ namespace AdoNetCore.AseClient
                 throw new ObjectDisposedException(nameof(AseTransaction));
             }
 
-            if (_complete)
+            if (_complete || _connection.State != ConnectionState.Open)
             {
                 return;
             }

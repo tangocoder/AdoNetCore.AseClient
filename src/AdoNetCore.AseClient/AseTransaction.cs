@@ -146,16 +146,16 @@ namespace AdoNetCore.AseClient
                 return;
             }
 
-            if (disposing)
+            try
             {
-                _connection?.Dispose();
+                Rollback();
+            }
+            finally
+            {
+                _isDisposed = true;
             }
 
-            Rollback();
-            _isDisposed = true;
-
             base.Dispose(disposing);
-           
         }
 
         internal bool IsDisposed => _isDisposed;
@@ -170,7 +170,7 @@ namespace AdoNetCore.AseClient
                 throw new ObjectDisposedException(nameof(AseTransaction));
             }
 
-            if (_complete || _connection.State == ConnectionState.Closed || _connection.State == ConnectionState.Broken)
+            if (_complete || _connection.State != ConnectionState.Open)
             {
                 return;
             }
